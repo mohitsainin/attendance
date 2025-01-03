@@ -1,53 +1,53 @@
-# # VPC
-# resource "aws_vpc" "OT-micro" {
-#   cidr_block = var.vpc_CIDR
-#   tags = {
-#     Name = "OT-micro-VPC"
-#   }
-# }
+ # VPC
+ resource "aws_vpc" "OT-micro" {
+   cidr_block = var.vpc_CIDR
+  tags = {
+    Name = "OT-micro-VPC"
+  }
+}
 
 # # Internet Gateway
-# resource "aws_internet_gateway" "OT-micro-igw" {
-#   vpc_id = aws_vpc.OT-micro.id
-#   tags = {
-#     Name = "OT-micro-IGW"
-#   }
-# }
+resource "aws_internet_gateway" "OT-micro-igw" {
+   vpc_id = aws_vpc.OT-micro.id
+  tags = {
+    Name = "OT-micro-IGW"
+  }
+ }
 
 # # Public Route Table
-# resource "aws_route_table" "OT-micro-public-rt" {
-#   vpc_id = aws_vpc.OT-micro.id
-#   tags = {
-#     Name = "OT-micro-Public-RT"
-#   }
-# }
+ resource "aws_route_table" "OT-micro-public-rt" {
+   vpc_id = aws_vpc.OT-micro.id
+   tags = {
+    Name = "OT-micro-Public-RT"
+   }
+ }
 
 # # Route for Internet Gateway
-# resource "aws_route" "OT-micro-public-route" {
-#   route_table_id         = aws_route_table.OT-micro-public-rt.id
-#   destination_cidr_block = "0.0.0.0/0"
-#   gateway_id             = aws_internet_gateway.OT-micro-igw.id
-# }
+ resource "aws_route" "OT-micro-public-route" {
+   route_table_id         = aws_route_table.OT-micro-public-rt.id
+  destination_cidr_block = "0.0.0.0/0"
+   gateway_id             = aws_internet_gateway.OT-micro-igw.id
+ }
 
-# # Subnets
-# resource "aws_subnet" "application" {
-#   count             = 2
-#   vpc_id            = aws_vpc.OT-micro.id
-#   cidr_block        = var.Application_subnet_cidr[count.index]
-#   availability_zone = var.availability_zones[count.index]
-#   map_public_ip_on_launch = true
-#   tags = {
-#     Name = "application-subnet-${count.index + 1}"
-#     Type = "application"
-#   }
-# }
+ # Subnets
+ resource "aws_subnet" "application" {
+   count             = 2
+   vpc_id            = aws_vpc.OT-micro.id
+   cidr_block        = var.Application_subnet_cidr[count.index]
+  availability_zone = var.availability_zones[count.index]
+   map_public_ip_on_launch = true
+   tags = {
+     Name = "application-subnet-${count.index + 1}"
+     Type = "application"
+   }
+ }
 
 # # Associate Subnets with Route Table
-# resource "aws_route_table_association" "public_association" {
-#   count          = 2
-#   subnet_id      = aws_subnet.application[count.index].id
-#   route_table_id = aws_route_table.OT-micro-public-rt.id
-# }
+ resource "aws_route_table_association" "public_association" {
+   count          = 2
+   subnet_id      = aws_subnet.application[count.index].id
+   route_table_id = aws_route_table.OT-micro-public-rt.id
+ }
 
 # Security Group
 resource "aws_security_group" "attendance-sg" {
@@ -74,17 +74,17 @@ resource "aws_security_group" "attendance-sg" {
 }
 
 # # Load Balancer
-# resource "aws_lb" "my_alb" {
-#   name               = "my-alb"
-#   internal           = false
-#   load_balancer_type = "application"
-#   security_groups    = [aws_security_group.attendance-sg.id]
-#   subnets            = aws_subnet.application[*].id
+ resource "aws_lb" "my_alb" {
+   name               = "my-alb"
+   internal           = false
+   load_balancer_type = "application"
+   security_groups    = [aws_security_group.attendance-sg.id]
+   subnets            = aws_subnet.application[*].id
 
-#   tags = {
-#     Name = "OT-micro-ALB"
-#   }
-# }
+   tags = {
+     Name = "OT-micro-ALB"
+   }
+ }
 
 # ALB Listener
 resource "aws_lb_listener" "http_listener" {
